@@ -1,0 +1,23 @@
+<zml>
+<vspace h="4"><center><font size="20" color="#FF9000">Warning
+
+<p><vspace h="12"><left><font size="16" color="text_color">
+<hspace w="12">
+This program is NOT official SEGA production. It is distributed in the
+hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+<p><vspace h="8"><left><font size="14" color="text">
+<hspace w="12">
+In other words, dcplaya developers have worked hard to make it possible.
+They have make the best to do a nice program and test it for you during hours.
+This is a lot of work and they made it for FREE. They do not want to be implied
+with any purchase for anything that happen to you or to anything while using
+this program. Problems may be submit to them but this is without any
+warranty !
+
+<p><vspace h="8"><left><font size="16" color="#ffa080">
+<hspace w="12">
+If you are not agree with the above text. Just switch off your dreamcast and
+breaks dcplaya CD so that you do not run it again by mistake !
+</a>

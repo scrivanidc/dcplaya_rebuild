@@ -1,0 +1,341 @@
+# Generic makefile for dcplaya
+#
+# (C) COPYRIGHT 2002 Ben(jamin) Gerard
+#
+# $Id$
+#
+
+.SUFFIXES:
+
+TOP_DIR="@TOP_DIR@"
+UTILS_DIR=$(TOP_DIR)/utils
+DOC_DIR=@DOC_DIR@
+DCPLAYA_VERSION=@VERSION_STR@
+DCPLAYA_VERSION_NUM=@VERSION@
+export TOP_DIR UTILS_DIR DOC_DIR DCPLAYA_VERSION DCPLAYA_VERSION_NUM
+
+MASTER=@MASTER@
+RELEASE=@RELEASE@
+DEBUG=@DEBUG@
+export MASTER RELEASE DEBUG
+
+# Liste of rules that discard dependencies rebuild
+NODEP_RULES := clean dependclean depclean clean-depend depend-clean req required maintainer-clean distclean clean_local
+
+export PPMTOXPM=@PPMTOXPM@
+
+# ----------------------------------------------------------------------
+# Setup for KOS
+# ----------------------------------------------------------------------
+
+KOS_ALL_VARS :=\
+ HOST_CC\
+ HOST_CFLAGS\
+ KOS_AFLAGS\
+ KOS_ARCH\
+ KOS_AR\
+ KOS_AS\
+ KOS_BIN2O\
+ KOS_CC\
+ KOS_CFLAGS\
+ KOS_CXXFLAGS\
+ KOS_CXX\
+ KOS_GENROMFS\
+ KOS_INCS\
+ KOS_LDFLAGS\
+ KOS_LD\
+ KOS_LOADER\
+ KOS_LOADER_FLAGS\
+ KOS_MAKE\
+ KOS_NM\
+ KOS_OBJCOPY\
+ KOS_OBJDUMP\
+ KOS_RANLIB\
+ KOS_STRIP
+
+# Genromfs utility
+KOS_GENROMFS=@KOS_GENROMFS@
+
+# Build architecture
+KOS_ARCH="@KOS_ARCH@"
+
+# KOS base paths
+KOS_BASE=@KOS_BASE@
+ifeq 'x$(origin KOS_INCS)' 'xenvironment'
+KOS_INCS:=
+endif
+KOS_INCS+= -I$(KOS_BASE)/include -I$(KOS_BASE)/libc/include -I$(KOS_BASE)/addons/include
+
+#export KOS_ARCH KOS_BASE KOS_INCS
+
+# Make utility
+@SET_MAKE@
+KOS_MAKE=$(MAKE)
+
+# Host compiler
+HOST_CC=@HOST_CC@
+HOST_CFLAGS=@HOST_CFLAGS@
+
+# Dreamcast loader utility
+KOS_LOADER=@KOS_LOADER@
+KOS_LOADER_FLAGS=@KOS_LOADER_FLAGS@
+
+# Genromfs utility
+KOS_GENROMFS=@KOS_GENROMFS@
+
+# Binary to object
+KOS_BIN2O=@KOS_BIN2O@
+
+#export KOS_MAKE KOS_LOADER KOS_BIN2O
+
+# SH-4 compile tools
+KOS_CC=@SH_CC@
+KOS_CXX=@SH_CXX@
+KOS_AS=@SH_AS@
+KOS_LD=@SH_LD@
+#export KOS_CC KOS_CXX KOS_AS KOS_LD
+
+# SH-4 bin utils
+KOS_AR=@SH_AR@
+KOS_RANLIB=@SH_RANLIB@
+KOS_OBJCOPY=@SH_OBJCOPY@
+KOS_OBJDUMP=@SH_OBJDUMP@
+KOS_NM=@SH_NM@
+KOS_STRIP=@SH_STRIP@
+#export KOS_AR KOS_RANLIB KOS_OBJCOPY KOS_OBJDUMP KOS_NM KOS_STRIP
+
+# SH-4 compile flags
+KOS_CFLAGS=@SH_CFLAGS@
+KOS_CXXFLAGS=@SH_CXXFLAGS@
+KOS_AFLAGS=-little
+KOS_LDFLAGS=-ml -m4-single-only -nostartfiles -nostdlib -Wl,-Ttext=0x8c010000,--section-start,stack=0x8d000000
+export KOS_CFLAGS KOS_CPPFLAGS KOS_AFLAGS KOS_LDFLAGS
+
+export KOS_ALL_VARS $(KOS_ALL_VARS)
+
+ifndef OBJS
+S_SRCS = $(wildcard *.s) 
+C_SRCS = $(wildcard *.c) 
+CXX_SRCS = $(wildcard *.cxx) 
+
+S_OBJS = $(S_SRCS:%.s=%.o)
+C_OBJS = $(C_SRCS:%.c=%.o)
+CXX_OBJS = $(CXX_SRCS:%.cxx=%.o)
+
+SRCS = $(S_SRCS) $(C_SRCS) $(CXX_SRCS)
+OBJS = $(S_OBJS) $(C_OBJS) $(CXX_OBJS)
+endif
+
+ifndef DEPS
+DEPS = $(C_OBJS:%.o=.deps/%.d) $(CXX_OBJS:%.o=.deps/%.d)
+endif
+
+ifeq '$(LIBRARY)' 'yes'
+ifndef LIBNAME
+LIBNAME := lib$(shell basename `pwd`).a
+endif
+endif
+
+ifeq '$(LEZ)' 'yes'
+ifndef LEFS
+LEFS := $(shell basename `pwd`).lez
+ILEFS := $(LEFS:%.lez=%.lef)
+.PRECIOUS: $(ILEFS)
+endif
+endif
+
+ifeq '$(LEF)' 'yes'
+ifndef LEFS
+LEFS := $(shell basename `pwd`).lef
+ILEFS := $(LEFS:%.lef=%.lez)
+endif
+endif
+
+# ----------------------------------------------------------------------
+OPT_FLOAT   = -ffast-math
+OPT_GENERAL = -fomit-frame-pointer -fno-builtin -fno-strict-aliasing
+OPT_SPEED   = -O3 -funroll-loops -finline-functions
+OPT_SIZE    = -Os -fno-inline 
+
+OPTIMIZE_FOR_SPEED = $(OPT_GENERAL) $(OPT_FLOAT) $(OPT_SPEED)
+OPTIMIZE_FOR_SIZE  = $(OPT_GENERAL) $(OPT_SIZE)
+
+ifndef OPTIMIZE
+OPTIMIZE = $(OPT_GENERAL)
+endif
+
+# ----------------------------------------------------------------------
+
+KOS_LOCAL_CFLAGS += $(OPTIMIZE)
+
+DEPEND_INCS = $(KOS_LOCAL_INCS) $(KOS_INCS) -I$(KOS_BASE)/kernel/arch/$(KOS_ARCH)/include
+DEPEND_DEFINES = -D_arch_$(KOS_ARCH) $(filter -D%, $(KOS_CFLAGS) $(KOS_LOCAL_CFLAGS))
+
+ifeq "$(strip $(TARGETS))" ""
+TARGETS=$(LEFS) $(ELFS)
+endif
+
+ifeq "$(strip $(TARGETS))" ""
+TARGETS:=$(LIBNAME)
+endif
+
+ifeq "$(strip $(TARGETS))" ""
+TARGETS:=$(OBJS)
+endif
+
+ifeq "$(strip $(TARGETS) $(SUBDIRS))" ""
+all:;@echo 'Nothing to make!'
+else
+all : subdirs $(TARGETS)
+	@echo "Target project [$(TARGETS)] has been build"
+endif
+
+$(LIBNAME) : $(OBJS) $(LIB_EXTRA) $(LIB_TARGET_EXTRA_DEP)
+	@echo "Build library [$@]"
+	@rm -f $@
+	@$(KOS_AR) crs $@ $^ 
+	@$(KOS_RANLIB) $@
+
+%.elf : $(OBJS) $(ELF_TARGET_EXTRA_DEP)
+	@echo "Build [$@] from [$^]"
+	$(KOS_LD) -b elf32-shl -EL -r -x -O -S $^ $(ELF_EXTRA) -o $@
+
+%.lez : %.lef
+	@echo "Build [$@] from [$^]"
+	@gzip --best -n -c -v $< >$@
+%.lef : $(OBJS) $(filter %.a %.o %.elf %.lef, $(LEF_EXTRA)) $(LEF_TARGET_EXTRA_DEP)
+	@echo "Build [$@] from [$^]"
+	@$(KOS_LD) -b elf32-shl -d -O 3 -EL -r --cref -M -Map $*.map -x -O -S $^ $(LEF_EXTRA) -o $@
+	@$(KOS_STRIP) --strip-unneeded $@
+	@$(KOS_OBJDUMP) -t $@ | grep '*COM*' || echo ":_) No *COM* found."
+
+%.bin : %.elf $(BIN_TARGET_EXTRA_DEP)
+	@echo "Build [$@] from [$^] [`pwd`]"
+	@$(KOS_OBJCOPY) -O binary -R .stack $< $@
+
+
+subdirs: $(patsubst %, _dir_%, $(SUBDIRS))
+
+$(patsubst %, _dir_%, $(SUBDIRS)):
+	@$(MAKE) -C $(patsubst _dir_%, %, $@)
+
+# ----------------------------------------------------------------------
+# Clean rules
+# ----------------------------------------------------------------------
+clean_subdirs: $(patsubst %, _clean_dir_%, $(SUBDIRS))
+
+$(patsubst %, _clean_dir_%, $(SUBDIRS)):
+	@$(MAKE) -s -C $(patsubst _clean_dir_%, %, $@) clean
+
+clean: clean_subdirs clean_local
+	@echo "[$@ (`pwd`)]"
+
+clean_local:
+	@echo "[$@ (`pwd`)]"
+	@rm -f $(LEFS) $(ILEFS) $(OBJS) $(CLEAN_LOCAL) $(LIBNAME) $(TARGETS) *.map
+
+distclean: depend-clean clean
+	@echo "[$@ (`pwd`)]"
+	@rm -f TAGS ID VERSION
+	@rm -f include/dcplaya/config.h Makefile.inc doc/Makefile
+	@rm -f cvs.log config.cache config.log stamp-h stamp-h[0-9]*
+	@find . -type f -name '*~' -exec rm -f '{}' \;
+	@find . -type f -name Makefile.dep -exec rm -f '{}' \;
+	@rm -rf `find . -type d -name '\.deps'`
+
+maintainer-clean: distclean 
+	@echo "[$@ (`pwd`)]"
+	@(cd $(TOP_DIR) && \
+	rm -rf config.cache config.log config.status configure autom4te.cache;)
+
+# ----------------------------------------------------------------------
+# Dependencies
+# ----------------------------------------------------------------------
+# $(patsubst %, _dep_dir_%, $(SUBDIRS)):
+# 	@$(MAKE) -s -C $(patsubst _dir_%, %, $@)
+
+.deps:
+	@echo "[$@ (`pwd`)]"
+	@mkdir -p .deps
+
+depend_subdirs: $(patsubst %, _depend_dir_%, $(SUBDIRS))
+	@echo "[$@ `pwd`]"
+
+$(patsubst %, _depend_dir_%, $(SUBDIRS)):
+	@$(MAKE) -s -C $(patsubst _depend_dir_%, %, $@) depend
+
+dep depend: Makefile.dep  depend_subdirs $(DEPEND_EXTRA)
+	@echo "[$@ `pwd`]"
+
+Makefile.dep: $(DEPS)
+	@echo "[$@ (`pwd`)]"
+	@cat -s /dev/null $(DEPS) > Makefile.dep
+
+
+$(patsubst %, _depend-clean_dir_%, $(SUBDIRS)):
+	@$(MAKE) -s -C $(patsubst _depend-clean_dir_%, %, $@) depend-clean
+
+depend-clean_subdirs: $(patsubst %, _depend-clean_dir_%, $(SUBDIRS))
+
+dependclean depclean clean-depend depend-clean : depend-clean_subdirs
+	@echo "[$@ `pwd`]"
+	@rm -f Makefile.dep .deps/*
+	@touch Makefile.dep
+
+# ----------------------------------------------------------------------
+# Required
+# ----------------------------------------------------------------------
+
+$(patsubst %, _required_dir_%, $(SUBDIRS)):
+	@$(MAKE) -s -C $(patsubst _required_dir_%, %, $@) required
+
+required_subdirs: $(patsubst %, _required_dir_%, $(SUBDIRS))
+
+req required: .deps $(REQUIRED_LOCAL) required_subdirs
+	@echo "[$@ (`pwd`)]"
+
+# ----------------------------------------------------------------------
+
+# Remove standard includes, assumes local includes are "" and kos are <>
+KOS_INC_RULES=$(KOS_LOCAL_INCS) -I- $(KOS_INCS) -I$(KOS_BASE)/kernel/arch/$(KOS_ARCH)/include
+
+#CDEP=-MT $@ -MD -MP -MF .deps/$(@:%.o=%.d)
+
+# Build dependency files
+.deps/%.d: %.c .deps
+	@echo "[$@ (`pwd`)]"
+	@$(KOS_CC) $(KOS_CFLAGS) $(KOS_LOCAL_CFLAGS) $(KOS_INC_RULES) -D_arch_$(KOS_ARCH) $<  -M -MP > $@  2> /dev/null || touch $@
+
+.deps/%.d: %.cxx .deps
+	@echo "[$@ (`pwd`)]"
+	@$(KOS_CXX) $(KOS_CXXFLAGS) $(KOS_LOCAL_CXXFLAGS) $(KOS_INC_RULES) -D_arch_$(KOS_ARCH) $<  -M -MP > $@ 2> /dev/null || touch $@
+
+
+# Build rules
+%.o: %.c
+	@echo "CC [$(@F)] from [$(<F)]"
+	@$(KOS_CC) $(KOS_CFLAGS) $(KOS_LOCAL_CFLAGS) $(KOS_INC_RULES) -D_arch_$(KOS_ARCH) -c $< -o $@
+
+%.o: %.cxx
+	@echo "CXX [$(@F)] from [$(<F)]"
+	@$(KOS_CXX) $(KOS_CXXFLAGS) $(KOS_LOCAL_CXXFLAGS) $(KOS_INC_RULES) -D_arch_$(KOS_ARCH) -c $< -o $@
+
+%.o: %.cpp
+	@echo "CXX [$(@F)] from [$(<F)]"
+	@$(KOS_CXX) $(KOS_CXXFLAGS) $(KOS_LOCAL_CXXFLAGS) $(KOS_INC_RULES) -D_arch_$(KOS_ARCH) -c $< -o $@
+
+%.o: %.s
+	@echo "AS [$(@F)] from [$(<F)]"
+	@$(KOS_AS) $(KOS_AFLAGS) $< -o $@
+
+%.o: %.img
+	@echo "Build [$(@F)] from [$(<F)]"
+	@KOS_ARCH=$(KOS_ARCH) KOS_LD=$(KOS_LD) $(KOS_BIN2O) $< $(notdir $*) $@
+
+# Some extra variables
+KOS_ARCH_DIR = $(KOS_BASE)/kernel/arch/$(KOS_ARCH)
+KOS_START = $(KOS_ARCH_DIR)/kernel/startup.o
+
+ifeq "$(filter $(NODEP_RULES),$(MAKECMDGOALS))" ""
+-include Makefile.dep
+endif

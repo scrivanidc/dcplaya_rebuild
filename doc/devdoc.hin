@@ -1,0 +1,17 @@
+/* This is dcplaya documentation C API group definition */
+
+/**
+@defgroup  dcplaya_devel  C API
+@ingroup   dcplaya
+@author    benjamin gerard
+@brief     programming dcplaya C components
+ **/
+
+/**
+@defgroup  dcplaya_exe_plugin_devel Executable Plugin API
+@ingroup   dcplaya_plugin_devel
+@author    benjamin gerard
+@brief     programming dcplaya executable plugins
+ **/
+
+

@@ -1,0 +1,86 @@
+<zml>
+<macro macro-name="title-font" macro-cmd="font" color="#F09090" size="24">
+<macro macro-name="chapter-font" macro-cmd="font" color="#A0E8F0" size="16">
+<macro macro-name="body-font" macro-cmd="font" color="text_color" size="14">
+<macro macro-name="sub-font" macro-cmd="font" color="#d0b090" size="12">
+<macro macro-name="avant" macro-cmd="vspace" h="20">
+<macro macro-name="apres" macro-cmd="vspace" h="12">
+
+<p vspace="2"><center><title-font>plugins
+
+<p><avant><center><chapter-font>
+<a name="what">What the hell is a plugin ?</a>
+
+<p><apres><left><body-font>
+Plugins are external program that allow dcplaya developers or third party
+developer to add new features without the need to change version.<br>
+Plugins are available as files which should have a ".lef" or ".lez" extension.
+A ".lez" file is the same than ".lef" except it has been compressed with
+gzip utility.
+
+<p><avant><center><chapter-font>
+<a name="where">Where can I find new plugins ?</a>
+
+<p><apres><left><body-font>
+At the time these lines are written there is no real dcplaya place for
+the plugin. You had to check out dcplaya web-site. 
+
+<p><avant><center><chapter-font>
+<a name="kind">What kind of feature can be added ?</a>
+
+<p><apres><left><body-font>
+Plugins are sorted by category :
+<apres><center>
+<a href="#input">input</a> - 
+<a href="#visual">visual</a> - 
+<a href="#object">object</a> - 
+<a href="#image">image</a> - 
+<a href="#executable">executable</a>
+
+<p><avant><center><chapter-font>
+<a name="input">input</a>
+<p><sub-font>(music for your ears)
+
+<p><apres><body-font><left>
+input plugin are probably the most important plugin category. It is used to
+add new playable music format. A input plugin adds a new music file-type. It
+provides a file loader, a decoder and information on the music (author,
+bit-rate, duration ...).
+
+<p><avant><center><chapter-font>
+<a name="visual">visual</a>
+<p><sub-font>(for your eyes only)
+
+<p><apres><body-font><left>
+visual plugins provides visual effects. Nothing more to tell here except that
+visual plugin can have many options but dcplaya do not offer a nice gui to set
+them. Advanced users can use dcplaya console to change them.
+
+<p><avant><center><chapter-font>
+<a name="image">image</a>
+<p><sub-font>(bitmap maniacs)
+
+<p><apres><body-font><left>
+image plugins are used by dcplaya to load image file. Images could be use
+for multiple purposes. First images can be used as wallpaper for dcplaya
+background. It can be used by the graphic API (icons, sprites, textures...).
+Images plugins add a new image file-type and provides a file loader and
+information on this files (resolution, color space...).
+
+<p><avant><center><chapter-font>
+<a name="object">object</a>
+<p><sub-font>(3D maniacs)
+
+<p><apres><body-font><left>
+object plugins adds 3d objects that can be used by visual plugins. Current
+object plugin API is really poor and would probably be change in the future.
+
+<p><avant><center><chapter-font>
+<a name="executable">executable</a>
+<p><sub-font>(developer realm)
+
+<p><apres><body-font><left>
+executable plugins main purpose is to had functionalities to the dcplaya LUA
+interpretor. It adds new functions that could be run from dcplaya console or by
+dcplaya scripts. executable plugins are not limited to this. In fact it can do
+anything like patching dcplaya or whatever.

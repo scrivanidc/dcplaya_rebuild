@@ -1,0 +1,60 @@
+/**
+ * @page   bug_page  Bug report and tracking
+ * @author ben
+ * @date   2002/09/18
+ *
+ * $Id$
+ *
+ *  This is the bug section. Run for your life.
+ *
+ * @par		Filetype corruption at driver load/remove.
+ * @date	2002/09/18
+ * @author	ben
+ *
+ *  Loading/removing input driver makes filetype error. Removed driver does
+ *  not free its id which is used as filetype. songmenu.c can not find the
+ *  driver back.
+ *  Need to alloc/free filetype correctly in driver_list.c.
+ *
+ * @date        2002/09/21
+ * @author	ben
+ *
+ *  Hacked : songmenu retrieves the filetype again in case it does not found
+ *  a suitable driver. This is probably not a very clean solution to this
+ *  problem but it fix the input plugin reload !
+ *
+ * @par		FFT-VLR
+ * @date	2002/09/18
+ * @author	ben
+ *
+ *  Face's colors are NOT initialized at start(). Wrong smoothing for
+ *  border faces because the "invisible" face has no color.
+ *
+ *
+ * @par     	Protection fault.
+ * @date	2002/09/18
+ * @author  	ben
+ *
+ *  Crash when playing a mp3 with FFTVLR running. No idea of a cause for
+ *  this bug.
+ *
+ *
+ * @par     	Dead lock.
+ * @date    	2002/09/23
+ * @author  	ben
+ *
+ *  Dead lock when decoder goes out too early ???
+ *
+ * @date    	2002/09/23
+ * @author  	ben
+ *
+ *  This happen when replay frequency becomes to low ! 
+ *  Needs to check parameter when setting stream frequency.
+ *
+ * @par     	selected playing music.
+ * @date    	2002/09/23
+ * @author  	ben
+ *
+ *  The hilight of selected playing music do not disapear when music stops.
+ *
+ **/
